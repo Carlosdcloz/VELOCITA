@@ -1,0 +1,110 @@
+:root{
+  --bg:#090806;--ink:#11100c;--stone:#3a3530;--ash:#7a7068;
+  --sand:#c8b99a;--cream:#e8e0d5;--ivory:#f5f0ea;
+  --gold:#c9a96e;--gold-l:#e0c898;--gold-d:#9a7840;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Jost','Helvetica Neue',sans-serif;
+  --rec:'Recoleta','Cormorant Garamond',Georgia,serif;
+}
+
+
+.g1 {
+  background-image: url("img/WeAreTransfer-14.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g2 {
+  background-image: url("img/WeAreTransfer-13.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g3 {
+  background-image: url("img/WeAreTransfer-12.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g4 {
+  background-image: url("img/WeAreTransfer-2.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g5 {
+  background-image: url("img/WeAreTransfer-6.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g6 {
+  background-image: url("img/WeAreTransfer-9.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g7 {
+  background-image: url("img/WeAreTransfer-3.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.g8 {
+  background-image: url("img/WeAreTransfer-7.webp");
+  background-size: cover;
+  background-position: center;
+}
+
+.scroll-hint-band {
+
+    margin-bottom: 40px;
+}
+
+#c2t {
+    overflow-y: hidden;
+}
+
+.ctasub {
+    font-weight: 400 !important;
+    color: #070504 !important;
+}
+
+.ctabtn{
+    font-weight: 400 !important;
+    color: #070504 !important;
+}
+
+
+.pablo-photo::before {
+
+    /* background: url("https://static.wixstatic.com/media/6012c5_2089d5bc45f840a4a076a8d1d2d28f8e~mv2.jpg/v1/fill/w_326,h_408,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/6012c5_2089d5bc45f840a4a076a8d1d2d28f8e~mv2.jpg") !important; */
+    filter: grayscale(1);
+
+}
+
+
+.nl {
+    font-family: var(--rec) !important;
+    font-weight: 400 !important;
+    font-size: clamp(16px, 1.8vw, 22px) !important;
+    color: var(--ivory) !important;
+    text-decoration: none !important;
+}
+
+.nl span{
+    font-family: var(--sans) !important;
+    font-weight: 200 !important;
+    font-size: .5em;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: rgba(201, 169, 110, .5);
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+
+.nl em {
+    font-style: italic;
+    color: var(--gold);
+}

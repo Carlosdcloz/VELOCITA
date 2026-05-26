@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Velociteca — Biblioteca de Imagen · Velocità.art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Recoleta';src:url('https://fonts.cdnfonts.com/s/36003/Recoleta-RegularDEMO.woff') format('woff');font-weight:400;font-style:normal;font-display:swap;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#090806;--ink:#11100c;--stone:#3a3530;--ash:#7a7068;
+  --sand:#c8b99a;--cream:#e8e0d5;--ivory:#f5f0ea;
+  --gold:#c9a96e;--gold-l:#e0c898;--gold-d:#9a7840;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Jost','Helvetica Neue',sans-serif;
+  --rec:'Recoleta','Cormorant Garamond',Georgia,serif;
+}
+html{font-size:16px;overflow-x:hidden;scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--ivory);font-family:var(--sans);font-weight:300;overflow-x:hidden;cursor:none;}
+::-webkit-scrollbar{width:2px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--gold);}
+
+/* GRAIN */
+.grain{position:fixed;inset:-50%;width:200%;height:200%;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:.032;pointer-events:none;z-index:9000;animation:grsh 8s steps(2) infinite;}
+@keyframes grsh{0%{transform:translate(0,0)}25%{transform:translate(-2%,-3%)}50%{transform:translate(3%,2%)}75%{transform:translate(-1%,3%)}100%{transform:translate(0,0)}}
+
+/* CURSOR */
+#cur{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .15s,width .2s,height .2s;}
+#ring{position:fixed;width:34px;height:34px;border:1px solid rgba(201,169,110,.38);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.16,1,.3,1),width .3s,height .3s,opacity .3s;}
+body.hov #cur{transform:translate(-50%,-50%) scale(2.5);}
+body.hov #ring{width:60px;height:60px;border-color:rgba(201,169,110,.65);}
+body.modal-open #cur,body.modal-open #ring{opacity:0;}
+
+/* PROGRESS BAR */
+#pbar{position:fixed;top:0;left:0;z-index:8000;height:1px;width:0%;background:linear-gradient(to right,transparent,var(--gold),var(--gold-l));pointer-events:none;transition:width .1s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:700;padding:clamp(18px,2.5vw,30px) clamp(24px,5vw,80px);display:flex;justify-content:space-between;align-items:center;background:linear-gradient(to bottom,rgba(9,8,6,.95) 0%,rgba(9,8,6,.0) 100%);backdrop-filter:blur(0px);}
+nav.scrolled{background:rgba(9,8,6,.92);backdrop-filter:blur(12px);}
+.nav-logo{font-family:var(--rec);font-weight:400;font-size:clamp(16px,1.8vw,22px);color:var(--ivory);text-decoration:none;letter-spacing:-.01em;}
+.nav-logo em{font-style:italic;color:var(--gold);}
+.nav-logo span{font-family:var(--sans);font-weight:200;font-size:.5em;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,169,110,.5);margin-left:6px;vertical-align:middle;}
+.nav-links{display:flex;gap:clamp(16px,2.5vw,44px);list-style:none;align-items:center;}
+.nav-links a{font-family:var(--sans);font-weight:200;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ash);text-decoration:none;position:relative;transition:color .3s;}
+.nav-links a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:1px;background:var(--gold);transition:width .4s;}
+.nav-links a:hover,.nav-links a.active{color:var(--ivory);}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%;}
+.nav-links a.active{color:var(--gold);}
+
+/* HERO */
+.hero{padding:clamp(120px,16vh,180px) clamp(24px,5vw,80px) clamp(48px,6vh,80px);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 100%,transparent 40%,rgba(9,8,6,.8) 100%);}
+.hero-eyebrow{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.55em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:12px;margin-bottom:20px;opacity:0;animation:fadeUp .8s .3s ease forwards;}
+.hero-eyebrow::before{content:'';width:20px;height:1px;background:var(--gold);}
+.hero-title{font-family:var(--rec);font-weight:400;font-size:clamp(52px,9vw,130px);line-height:.88;letter-spacing:-.02em;color:var(--ivory);margin-bottom:clamp(16px,2vw,28px);opacity:0;animation:fadeUp .9s .45s cubic-bezier(.22,1,.36,1) forwards;}
+.hero-title em{font-style:italic;color:var(--sand);display:block;}
+.hero-sub{font-family:var(--sans);font-weight:200;font-size:13px;letter-spacing:.06em;line-height:2;color:var(--ash);max-width:480px;opacity:0;animation:fadeUp .7s .65s ease forwards;}
+.hero-count{position:absolute;bottom:clamp(48px,6vh,80px);right:clamp(24px,5vw,80px);text-align:right;opacity:0;animation:fadeIn .8s .9s ease forwards;}
+.hero-count-n{font-family:var(--rec);font-weight:400;font-size:clamp(48px,7vw,90px);color:transparent;-webkit-text-stroke:1px rgba(201,169,110,.2);line-height:1;}
+.hero-count-l{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* FILTERS */
+.filter-bar{position:sticky;top:0;z-index:600;background:rgba(9,8,6,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(201,169,110,.07);padding:0 clamp(24px,5vw,80px);}
+.filter-inner{display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.filter-inner::-webkit-scrollbar{display:none;}
+.filter-group{display:flex;align-items:center;gap:0;flex-shrink:0;}
+.filter-label{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.42em;text-transform:uppercase;color:var(--stone);padding:22px 20px 22px 0;white-space:nowrap;flex-shrink:0;}
+.filter-sep{width:1px;height:14px;background:rgba(201,169,110,.12);margin:0 20px;flex-shrink:0;}
+.filter-btn{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.3em;text-transform:uppercase;color:var(--ash);background:none;border:none;cursor:none;padding:22px 16px;white-space:nowrap;position:relative;transition:color .3s;flex-shrink:0;}
+.filter-btn::after{content:'';position:absolute;bottom:0;left:16px;right:16px;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .35s cubic-bezier(.22,1,.36,1);}
+.filter-btn:hover{color:var(--cream);}
+.filter-btn.active{color:var(--gold);}
+.filter-btn.active::after{transform:scaleX(1);}
+.filter-count{font-size:8px;color:var(--stone);margin-left:5px;vertical-align:middle;}
+
+/* SORT */
+.sort-group{margin-left:auto;display:flex;align-items:center;gap:12px;flex-shrink:0;padding-left:20px;}
+.sort-btn{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--stone);background:none;border:none;cursor:none;padding:8px 0;transition:color .3s;}
+.sort-btn:hover,.sort-btn.active{color:var(--gold);}
+.sort-btn.active{position:relative;}
+
+/* GRID */
+.grid-container{padding:clamp(32px,4vw,64px) clamp(24px,5vw,80px);min-height:100vh;}
+
+.masonry-grid{columns:4;column-gap:12px;}
+@media(max-width:1400px){.masonry-grid{columns:3;}}
+@media(max-width:900px){.masonry-grid{columns:2;}}
+@media(max-width:560px){.masonry-grid{columns:1;}}
+
+/* PHOTO CARD */
+.photo-card{break-inside:avoid;margin-bottom:12px;position:relative;overflow:hidden;cursor:none;group:true;}
+.photo-card-inner{position:relative;overflow:hidden;}
+.photo-card-bg{width:100%;display:block;aspect-ratio:var(--ar,3/4);transition:transform 1.4s cubic-bezier(.25,.46,.45,.94),filter .6s;filter:saturate(.35) brightness(.58);}
+.photo-card:hover .photo-card-bg{transform:scale(1.06);filter:saturate(.75) brightness(.7);}
+.photo-card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(9,8,6,.98) 0%,rgba(9,8,6,.15) 45%,transparent 70%);pointer-events:none;}
+.photo-card-shimmer{position:absolute;inset:0;background:radial-gradient(ellipse 45% 55% at 30% 20%,rgba(201,169,110,.16) 0%,transparent 65%);mix-blend-mode:screen;opacity:0;transition:opacity .5s;}
+.photo-card:hover .photo-card-shimmer{opacity:1;}
+.photo-card-info{position:absolute;bottom:0;left:0;right:0;padding:clamp(14px,2vw,22px);z-index:2;transform:translateY(6px);transition:transform .45s cubic-bezier(.22,1,.36,1);}
+.photo-card:hover .photo-card-info{transform:translateY(0);}
+.photo-card-cat{font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;opacity:0;transform:translateY(8px);transition:opacity .35s .05s,transform .35s .05s;}
+.photo-card:hover .photo-card-cat{opacity:1;transform:translateY(0);}
+.photo-card-title{font-family:var(--rec);font-weight:400;font-size:clamp(13px,1.4vw,18px);color:var(--ivory);line-height:1.1;margin-bottom:6px;}
+.photo-card-meta{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(6px);transition:opacity .3s .1s,transform .3s .1s;}
+.photo-card:hover .photo-card-meta{opacity:1;transform:translateY(0);}
+.photo-card-loc{font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--ash);}
+.photo-card-ed{font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone);border:1px solid rgba(201,169,110,.14);padding:2px 6px;}
+.photo-card-idx{position:absolute;top:12px;left:14px;font-family:var(--serif);font-style:italic;font-weight:300;font-size:10px;color:rgba(201,169,110,.28);z-index:2;}
+.photo-card-tag{position:absolute;top:12px;right:14px;font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--sand);border:1px solid rgba(200,185,154,.18);padding:2px 7px;background:rgba(9,8,6,.75);z-index:2;opacity:0;transform:translateX(6px);transition:opacity .35s,transform .35s;}
+.photo-card:hover .photo-card-tag{opacity:1;transform:translateX(0);}
+
+/* Entry animation */
+.photo-card{opacity:0;transform:translateY(24px);}
+.photo-card.visible{animation:cardIn .7s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0);}}
+
+/* LOAD MORE / INFINITE */
+.load-sentinel{height:80px;display:flex;align-items:center;justify-content:center;}
+.load-spinner{width:24px;height:24px;border:1px solid rgba(201,169,110,.15);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;opacity:0;transition:opacity .3s;}
+.load-spinner.visible{opacity:1;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:100px 40px;opacity:0;animation:fadeIn .5s .2s ease forwards;}
+.empty-icon{font-family:var(--serif);font-style:italic;font-size:60px;color:rgba(201,169,110,.1);margin-bottom:20px;}
+.empty-text{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--stone);}
+
+/* ═══════════════════════
+   LIGHTBOX MODAL
+═══════════════════════ */
+#lightbox{position:fixed;inset:0;z-index:5000;display:flex;align-items:stretch;opacity:0;pointer-events:none;transition:opacity .5s cubic-bezier(.22,1,.36,1);}
+#lightbox.open{opacity:1;pointer-events:all;}
+#lightbox.open .lb-backdrop{opacity:1;}
+#lightbox.open .lb-panel{transform:translateX(0);}
+@media(max-width:700px){#lightbox.open .lb-panel{transform:translateY(0);}}
+.lb-backdrop{position:absolute;inset:0;background:rgba(9,8,6,.96);cursor:none;opacity:0;transition:opacity .5s;}
+
+/* Desktop: side by side. Mobile: stacked (image top, panel bottom sheet) */
+.lb-content{position:relative;z-index:1;display:flex;width:100%;height:100%;flex-direction:row;}
+@media(max-width:700px){
+  .lb-content{flex-direction:column;}
+}
+
+/* Image side */
+.lb-img-side{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--ink);min-height:0;}
+@media(max-width:700px){
+  .lb-img-side{flex:0 0 45vh;min-height:45vh;}
+}
+.lb-img-bg{position:absolute;inset:0;transition:transform 1.4s cubic-bezier(.25,.46,.45,.94),filter .8s;filter:saturate(.4) brightness(.55);}
+/* When image is set via background-image, make sure it covers */
+.lb-img-bg[style*="background-image"]{background-size:cover;background-position:center;}
+#lightbox.open .lb-img-bg{filter:saturate(.7) brightness(.68);}
+.lb-img-shimmer{position:absolute;inset:0;background:radial-gradient(ellipse 40% 55% at 28% 22%,rgba(201,169,110,.18) 0%,transparent 65%);mix-blend-mode:screen;pointer-events:none;}
+.lb-img-overlay{position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,rgba(9,8,6,.5) 100%);pointer-events:none;}
+@media(max-width:700px){
+  .lb-img-overlay{background:linear-gradient(to bottom,transparent 55%,rgba(9,8,6,.7) 100%);}
+}
+.lb-img-label{position:absolute;bottom:clamp(20px,3vw,40px);left:clamp(20px,3vw,40px);}
+.lb-img-num{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(52px,9vw,140px);color:transparent;-webkit-text-stroke:1px rgba(201,169,110,.12);line-height:1;user-select:none;}
+
+/* Panel side */
+.lb-panel{width:clamp(300px,34vw,500px);background:var(--bg);border-left:1px solid rgba(201,169,110,.08);display:flex;flex-direction:column;transform:translateX(40px);transition:transform .6s cubic-bezier(.22,1,.36,1);overflow-y:auto;flex-shrink:0;}
+@media(max-width:700px){
+  .lb-panel{width:100%;flex:1;border-left:none;border-top:1px solid rgba(201,169,110,.1);transform:translateY(32px);overflow-y:auto;}
+}
+.lb-panel::-webkit-scrollbar{width:2px;}
+.lb-panel::-webkit-scrollbar-thumb{background:rgba(201,169,110,.2);}
+
+/* Close + nav buttons */
+.lb-close{position:fixed;top:16px;right:16px;z-index:5100;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,169,110,.2);background:rgba(9,8,6,.85);cursor:none;transition:border-color .3s,background .3s;backdrop-filter:blur(8px);}
+.lb-close:hover{border-color:rgba(201,169,110,.55);background:rgba(201,169,110,.1);}
+.lb-close svg{width:14px;height:14px;stroke:var(--ash);transition:stroke .3s;}
+.lb-close:hover svg{stroke:var(--gold);}
+.lb-nav{position:absolute;bottom:clamp(16px,2.5vw,36px);left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:10;}
+@media(max-width:700px){.lb-nav{bottom:12px;}}
+.lb-nav-btn{width:40px;height:40px;border:1px solid rgba(201,169,110,.15);background:rgba(9,8,6,.8);display:flex;align-items:center;justify-content:center;cursor:none;transition:border-color .3s,background .3s;backdrop-filter:blur(6px);}
+.lb-nav-btn:hover{border-color:rgba(201,169,110,.5);background:rgba(201,169,110,.08);}
+.lb-nav-btn svg{width:14px;height:14px;stroke:var(--ash);transition:stroke .3s;}
+.lb-nav-btn:hover svg{stroke:var(--gold);}
+
+/* Panel content — compact on mobile */
+.lb-panel-inner{padding:clamp(24px,4vw,56px) clamp(20px,3.5vw,48px);flex:1;}
+@media(max-width:700px){
+  .lb-panel-inner{padding:20px 20px 16px;}
+}
+.lb-eyebrow{font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.5em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.lb-eyebrow::before{content:'';width:14px;height:1px;background:var(--gold);}
+.lb-title{font-family:var(--rec);font-weight:400;font-size:clamp(20px,2.5vw,38px);color:var(--ivory);line-height:1.05;margin-bottom:6px;}
+.lb-title em{font-style:italic;color:var(--sand);display:block;}
+.lb-rule{width:36px;height:1px;background:rgba(201,169,110,.3);margin:16px 0;}
+.lb-desc{font-family:var(--sans);font-weight:200;font-size:12px;letter-spacing:.05em;line-height:2.1;color:var(--ash);margin-bottom:20px;}
+@media(max-width:700px){.lb-desc{display:none;}}
+
+/* Meta table */
+.lb-meta{margin-bottom:20px;}
+.lb-meta-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(201,169,110,.06);}
+.lb-meta-row:first-child{border-top:1px solid rgba(201,169,110,.06);}
+.lb-meta-key{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--stone);}
+.lb-meta-val{font-family:var(--serif);font-style:italic;font-weight:300;font-size:13px;color:var(--cream);text-align:right;}
+@media(max-width:700px){
+  /* Only show 3 most important rows on mobile */
+  .lb-meta-row:nth-child(n+4){display:none;}
+}
+
+/* Author block */
+.lb-author{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid rgba(201,169,110,.08);margin-bottom:20px;cursor:none;transition:border-color .4s,background .4s;text-decoration:none;}
+.lb-author:hover{border-color:rgba(201,169,110,.3);background:rgba(201,169,110,.04);}
+@media(max-width:700px){.lb-author{display:none;}}
+.lb-author-avatar{width:44px;height:44px;border-radius:50%;background:radial-gradient(ellipse 55% 65% at 42% 30%,#2a1e0c 0%,#100d08 60%,#060504 100%);flex-shrink:0;border:1px solid rgba(201,169,110,.15);position:relative;overflow:hidden;}
+.lb-author-avatar::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 40% 50% at 35% 25%,rgba(201,169,110,.2) 0%,transparent 65%);mix-blend-mode:screen;}
+.lb-author-info{}
+.lb-author-label{font-family:var(--sans);font-weight:200;font-size:8px;letter-spacing:.35em;text-transform:uppercase;color:var(--stone);margin-bottom:3px;}
+.lb-author-name{font-family:var(--rec);font-weight:400;font-size:15px;color:var(--ivory);}
+.lb-author-arr{margin-left:auto;font-size:16px;color:var(--stone);transition:color .3s,transform .3s;}
+.lb-author:hover .lb-author-arr{color:var(--gold);transform:translateX(4px);}
+
+/* CTA */
+.lb-cta{display:flex;align-items:center;gap:14px;font-family:var(--sans);font-weight:200;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--bg);background:var(--gold);padding:16px 28px;text-decoration:none;cursor:none;transition:background .35s,gap .4s cubic-bezier(.22,1,.36,1);width:100%;justify-content:center;}
+.lb-cta:hover{background:var(--gold-l);gap:22px;}
+.lb-cta-arr{width:18px;height:1px;background:var(--bg);position:relative;flex-shrink:0;transition:width .4s;}
+.lb-cta-arr::after{content:'';position:absolute;right:0;top:-3px;width:5px;height:5px;border-right:1px solid var(--bg);border-bottom:1px solid var(--bg);transform:rotate(-45deg);}
+.lb-cta:hover .lb-cta-arr{width:26px;}
+.lb-cta-secondary{font-family:var(--sans);font-weight:200;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--stone);text-align:center;padding:12px;cursor:none;transition:color .3s;display:block;}
+.lb-cta-secondary:hover{color:var(--gold);}
+.lb-panel-footer{padding:0 clamp(20px,3.5vw,48px) clamp(20px,2.5vw,36px);}
+
+/* ── PHOTO CARD IMAGE SUPPORT ──
+   Añade estas clases a .photo-card-bg para mostrar imágenes reales.
+   La clase .gb* / .gl* es el fondo de color que se muestra sin foto.
+   Con imagen: añade clase .has-img y usa background-image inline.
+   ─────────────────────────────────────────────── */
+.photo-card-bg.has-img{
+  background-size: cover;
+  background-position: center;
+  /* El gradiente de color queda como overlay debajo */
+}
+/* Si quieres que el gradiente de color acompañe a la foto (oscurece bordes) */
+.photo-card-bg.has-img::before{
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(9,8,6,.85) 0%, transparent 55%),
+              linear-gradient(to bottom, rgba(9,8,6,.25) 0%, transparent 40%);
+  z-index: 1;
+  pointer-events: none;
+}
+/* Lightbox image: igual que las cards */
+.lb-img-bg.has-img{
+  background-size: cover;
+  background-position: center;
+}
+
+/* ── FILTER BAR RESPONSIVE ── */
+@media(max-width:600px){
+  .filter-label{display:none;}
+  .filter-sep{display:none;}
+  .sort-group{display:none;}
+  .filter-btn{padding:18px 12px;font-size:8px;}
+  .filter-count{display:none;}
+}
+
+/* ── HERO RESPONSIVE ── */
+@media(max-width:600px){
+  .hero-count{display:none;}
+}
+
+/* ═══════════════════════
+   FOOTER
+═══════════════════════ */
+footer{padding:clamp(32px,4vh,52px) clamp(24px,5vw,80px);background:var(--ink);border-top:1px solid rgba(201,169,110,.07);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+.ftb{font-family:var(--rec);font-weight:400;font-size:clamp(15px,1.8vw,20px);color:var(--ivory);}
+.ftb em{font-style:italic;color:var(--gold);}
+.ftb span{font-family:var(--sans);font-weight:200;font-size:.48em;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,169,110,.5);margin-left:6px;vertical-align:middle;}
+.ftc{font-family:var(--sans);font-weight:200;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--stone);}
+
+/* TICKER */
+.ticker-wrap{overflow:hidden;border-top:1px solid rgba(201,169,110,.06);border-bottom:1px solid rgba(201,169,110,.06);}
+.ticker-track{display:flex;white-space:nowrap;animation:ticker 32s linear infinite;padding:18px 0;}
+.ticker-item{font-family:var(--serif);font-style:italic;font-weight:300;font-size:clamp(13px,1.6vw,20px);color:rgba(201,169,110,.18);padding:0 36px;}
+.ticker-dot{color:rgba(201,169,110,.26);font-size:7px;align-self:center;}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ─── Background gradients for photo cards ─── */
+.gb1{background:radial-gradient(ellipse 55% 70% at 48% 35%,#3a2a14 0%,#1a1208 45%,#080604 100%);}
+.gb2{background:radial-gradient(ellipse 50% 65% at 52% 30%,#2e2010 0%,#14100a 45%,#070504 100%);}
+.gb3{background:radial-gradient(ellipse 60% 75% at 45% 32%,#352515 0%,#181208 40%,#080604 100%);}
+.gb4{background:radial-gradient(ellipse 50% 68% at 50% 28%,#2a1c0e 0%,#12100a 48%,#060504 100%);}
+.gb5{background:radial-gradient(ellipse 58% 72% at 50% 32%,#3d2818 0%,#1e1510 42%,#0a0704 100%);}
+.gb6{background:radial-gradient(ellipse 52% 70% at 47% 34%,#311e0e 0%,#150e08 44%,#070504 100%);}
+.gb7{background:radial-gradient(ellipse 56% 68% at 51% 30%,#2c2010 0%,#13100b 46%,#070605 100%);}
+.gb8{background:radial-gradient(ellipse 54% 74% at 49% 33%,#38250f 0%,#1b1309 43%,#080604 100%);}
+.gb9{background:radial-gradient(ellipse 48% 66% at 44% 36%,#1e1a0e 0%,#0f0d08 48%,#050503 100%);}
+.gb10{background:radial-gradient(ellipse 62% 78% at 53% 28%,#2a1608 0%,#110e08 42%,#060504 100%);}
+.gb11{background:radial-gradient(ellipse 44% 62% at 46% 38%,#221a10 0%,#10100a 50%,#060604 100%);}
+.gb12{background:radial-gradient(ellipse 58% 68% at 54% 26%,#1a1a10 0%,#0e0e08 46%,#060604 100%);}
+/* Light accent variants */
+.gl1{background:radial-gradient(ellipse 55% 70% at 48% 35%,#4a3820 0%,#241a0c 40%,#0e0a06 100%);}
+.gl2{background:radial-gradient(ellipse 50% 65% at 52% 30%,#3e2e18 0%,#1c1410 42%,#0a0806 100%);}
+.gl3{background:radial-gradient(ellipse 60% 75% at 45% 32%,#453320 0%,#201810 38%,#0c0a06 100%);}
+.gl4{background:radial-gradient(ellipse 50% 68% at 50% 28%,#3a2818 0%,#1a1410 46%,#080604 100%);}
+
+/* ─── Lightbox image animation ─── */
+#lightbox.open .lb-img-bg{transform:scale(1.04);}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div id="cur"></div>
+<div id="ring"></div>
+<div id="pbar"></div>
+
+<nav id="nav">
+  <a href="index.html" class="nav-logo">Veloci<em>tà</em><span>.art</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html#after">Archivo</a></li>
+    <li><a href="index.html#mf">Estudio</a></li>
+    <li><a href="velocita-teca.html" class="active">Velociteca</a></li>
+    <!-- <li><a href="velocita-partners.html">Partners</a></li> -->
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Biblioteca de imagen · 2025</div>
+  <h1 class="hero-title">Veloci<em>teca.</em></h1>
+  <p class="hero-sub">El archivo completo. Cada imagen capturada al límite de la velocidad, disponible como edición limitada sobre papel de algodón 300g.</p>
+  <div class="hero-count">
+    <div class="hero-count-n" id="heroCount">48</div>
+    <div class="hero-count-l">imágenes en archivo</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item">MotoGP</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Formula 1</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">WRC · Rally</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Circuito · Pista</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Paddock</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Fine Art Print</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Ediciones · 12 ejemplares</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Pablo Carmona</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">MotoGP</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Formula 1</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">WRC · Rally</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Circuito · Pista</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Paddock</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Fine Art Print</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Ediciones · 12 ejemplares</span><span class="ticker-dot">◆</span>
+    <span class="ticker-item">Pablo Carmona</span><span class="ticker-dot">◆</span>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar" id="filterBar">
+  <div class="filter-inner">
+    <div class="filter-group">
+      <span class="filter-label">Filtrar</span>
+      <button class="filter-btn active" data-filter="all">Todas <span class="filter-count" id="fc-all">48</span></button>
+      <button class="filter-btn" data-filter="motogp">MotoGP <span class="filter-count" id="fc-motogp"></span></button>
+      <button class="filter-btn" data-filter="f1">Formula 1 <span class="filter-count" id="fc-f1"></span></button>
+      <button class="filter-btn" data-filter="wrc">WRC <span class="filter-count" id="fc-wrc"></span></button>
+      <button class="filter-btn" data-filter="paddock">Paddock <span class="filter-count" id="fc-paddock"></span></button>
+      <button class="filter-btn" data-filter="noche">Noche <span class="filter-count" id="fc-noche"></span></button>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="sort-group">
+      <button class="sort-btn active" data-sort="recent">Recientes</button>
+      <span style="color:var(--stone);font-size:10px;">·</span>
+      <button class="sort-btn" data-sort="circuit">Circuito</button>
+      <span style="color:var(--stone);font-size:10px;">·</span>
+      <button class="sort-btn" data-sort="edition">Edición</button>
+    </div>
+  </div>
+</div>
+
+<!-- GRID -->
+<div class="grid-container">
+  <div class="masonry-grid" id="grid"></div>
+  <div class="load-sentinel" id="sentinel"><div class="load-spinner" id="spinner"></div></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-icon">∅</div>
+    <div class="empty-text">Sin imágenes para este filtro.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ftb">Veloci<em>tà</em><span>.art</span></div>
+  <div class="ftc">© 2025 — Fine Art Motorsport Photography</div>
+  <div class="ftc">Madrid · Barcelona · Mugello</div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <div class="lb-backdrop" id="lbBackdrop"></div>
+  <div class="lb-content">
+    <div class="lb-img-side" id="lbImgSide">
+      <div class="lb-img-bg" id="lbImgBg"></div>
+      <div class="lb-img-shimmer"></div>
+      <div class="lb-img-overlay"></div>
+      <div class="lb-img-label">
+        <div class="lb-img-num" id="lbNum">01</div>
+      </div>
+      <button class="lb-close" id="lbClose">
+        <svg viewBox="0 0 14 14" fill="none" stroke-width="1"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+      </button>
+      <div class="lb-nav">
+        <button class="lb-nav-btn" id="lbPrev">
+          <svg viewBox="0 0 16 16" fill="none" stroke-width="1"><polyline points="10,2 4,8 10,14"/></svg>
+        </button>
+        <button class="lb-nav-btn" id="lbNext">
+          <svg viewBox="0 0 16 16" fill="none" stroke-width="1"><polyline points="6,2 12,8 6,14"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="lb-panel" id="lbPanel">
+      <div class="lb-panel-inner">
+        <div class="lb-eyebrow" id="lbCat">Categoría</div>
+        <h2 class="lb-title" id="lbTitle">Título</h2>
+        <div class="lb-rule"></div>
+        <p class="lb-desc" id="lbDesc">Descripción de la imagen.</p>
+        <div class="lb-meta" id="lbMeta"></div>
+        <a href="pablo-carmona.html" class="lb-author" id="lbAuthor">
+          <div class="lb-author-avatar"></div>
+          <div class="lb-author-info">
+            <div class="lb-author-label">Fotógrafo</div>
+            <div class="lb-author-name">Pablo Carmona</div>
+          </div>
+          <div class="lb-author-arr">→</div>
+        </a>
+      </div>
+      <div class="lb-panel-footer">
+        <a href="/cdn-cgi/l/email-protection#4f2720232e0f392a23202c263b2e612e3d3b703c3a2d252a2c3b720c20213c3a233b2e756f0e2b3e3a263c262c268cfc21" class="lb-cta">
+          <span>Adquirir esta imagen</span>
+          <span class="lb-cta-arr"></span>
+        </a>
+        <a href="/cdn-cgi/l/email-protection#b1d9deddd0f1c7d4ddded2d8c5d09fd0c3c58ec2c4d3dbd4d2c58cf8dfd7dec3dcd0d2d87202df8b91e1c3d8dfc5" class="lb-cta-secondary">Solicitar más información</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ══════════════════════════════════════
+   DATA — 48 fotografías
+══════════════════════════════════════ */
+const IMG_DIR = 'img/';
+const IMG_EXT = '.webp';
+const TEST_IMG = IMG_DIR + 'WeAreTransfer' + IMG_EXT;
+
+const ALL_PHOTOS = [
+  // ── MotoGP ──────────────────────────────────────────────────
+  {id:'001',title:'Morbidelli — Lusail',subtitle:'Al límite del grip',cat:'motogp',loc:'Qatar · 2024',circuit:'Lusail',year:2024,ed:'01/12',bg:'gb1',ar:'3/4',img_num:TEST_IMG,desc:'La moto baila sobre el asfalto caliente del atardecer qatarí. Morbidelli empujando cada décima, el neumático trasero al borde de la elocuencia.'},
+  {id:'002',title:'Bagnaia · Mugello',subtitle:'Curva 1',cat:'motogp',loc:'Italia · 2024',circuit:'Mugello',year:2024,ed:'02/12',bg:'gb3',ar:'4/5',img_num:TEST_IMG,desc:'El arco perfecto de Mugello. Bagnaia dibuja una trayectoria que solo existe en el instante, irrepetible, casi abstracta a 290 km/h.'},
+  {id:'003',title:'Última curva',subtitle:'Valencia',cat:'motogp',loc:'Valencia · 2023',circuit:'Valencia',year:2023,ed:'03/12',bg:'gb5',ar:'3/4',img_num:TEST_IMG,desc:'El adiós al circuito Ricardo Tormo. En la última curva, la moto se convierte en escultura. Luz de octubre, largo y dorado.'},
+  {id:'004',title:'Marc Márquez',subtitle:'Jerez · Primera vuelta',cat:'motogp',loc:'Jerez · 2024',circuit:'Jerez',year:2024,ed:'04/12',bg:'gb7',ar:'2/3',img_num:TEST_IMG,desc:'El regreso. Primera vuelta con el número 93 de nuevo entre los primeros. Una imagen que el paddock no esperaba ver tan pronto.'},
+  {id:'005',title:'Silverstone · Lluvia',subtitle:'Bajo el diluvio inglés',cat:'motogp',loc:'Silverstone · 2023',circuit:'Silverstone',year:2023,ed:'05/12',bg:'gl1',ar:'3/4',img_num:TEST_IMG,desc:'El agua convierte el asfalto en espejo. Las motos dejan estelas de luz. Silverstone bajo la lluvia es otro deporte.'},
+  {id:'006',title:'Paddock al alba',subtitle:'Antes del ruido',cat:'paddock',loc:'Jerez · 2024',circuit:'Jerez',year:2024,ed:'06/12',bg:'gb2',ar:'4/3',img_num:TEST_IMG,desc:'Las 5:47 AM. El paddock vacío pertenece a otro mundo. Los mecánicos ya están dentro, pero el silencio aún lo llena todo.'},
+  {id:'007',title:'Vinales · Aprilia',subtitle:'Full lean',cat:'motogp',loc:'Portimão · 2024',circuit:'Portimão',year:2024,ed:'07/12',bg:'gb4',ar:'3/4',img_num:TEST_IMG,desc:'El ángulo de inclinación. La física al límite de lo posible, la Aprilia tocando el asfalto con el pie. Un equilibrio imposible, congelado.'},
+  {id:'008',title:'Dusk · Qatar',subtitle:'Último sector',cat:'noche',loc:'Lusail · 2023',circuit:'Lusail',year:2023,ed:'08/12',bg:'gb6',ar:'2/3',img_num:TEST_IMG,desc:'La hora mágica en Lusail. Entre el día y la noche artificial del circuito, un instante de luz única que solo dura cuatro minutos.'},
+  {id:'009',title:'Pit lane · Noche',subtitle:'Operación garaje',cat:'noche',loc:'Qatar · 2023',circuit:'Lusail',year:2023,ed:'09/12',bg:'gb8',ar:'3/4',img_num:TEST_IMG,desc:'El ballet silencioso de los mecánicos. Bajo los fluorescentes del pit lane, cada movimiento es coreografiado con milimétrica precisión.'},
+  {id:'010',title:'Pre-race',subtitle:'Formación en parrilla',cat:'paddock',loc:'Portimão · 2023',circuit:'Portimão',year:2023,ed:'10/12',bg:'gb9',ar:'4/5',img_num:TEST_IMG,desc:'Los cinco minutos antes del caos. La parrilla de salida como obra de teatro: actores en posición, el telón a punto de levantarse.'},
+  {id:'011',title:'Curva Coppice',subtitle:'Silverstone',cat:'motogp',loc:'Silverstone · 2024',circuit:'Silverstone',year:2024,ed:'11/12',bg:'gb10',ar:'3/4',img_num:TEST_IMG,desc:'Coppice en seco. Una de las curvas más rápidas del calendario, tomada al límite. La moto no parece tocar el suelo.'},
+  {id:'012',title:'Garaje mecánicos',subtitle:'Entre carrera y carrera',cat:'paddock',loc:'Barcelona · 2024',circuit:'Barcelona',year:2024,ed:'12/12',bg:'gl2',ar:'2/3',img_num:TEST_IMG,desc:'El equipo dentro del garaje. El orden dentro del caos. Cada herramienta en su lugar. La preparación silenciosa de la victoria.'},
+  // ── Formula 1 ────────────────────────────────────────────────
+  {id:'013',title:'Hamilton · Mónaco',subtitle:'Tunnel exit',cat:'f1',loc:'Mónaco · 2023',circuit:'Mónaco',year:2023,ed:'01/12',bg:'gb11',ar:'3/4',img_num:TEST_IMG,desc:'La salida del túnel en Mónaco. El F1 emerge a la luz como un animal liberado. Un microsegundo que lo cambia todo.'},
+  {id:'014',title:'Verstappen · Spa',subtitle:'Eau Rouge',cat:'f1',loc:'Spa · 2023',circuit:'Spa',year:2023,ed:'02/12',bg:'gb12',ar:'4/3',img_num:TEST_IMG,desc:'Eau Rouge a toda velocidad. La curva más famosa de la Fórmula 1, tomada sin levantar el pie. Una declaración de dominio.'},
+  {id:'015',title:'Alonso · Baréin',subtitle:'Salida',cat:'f1',loc:'Baréin · 2024',circuit:'Sakhir',year:2024,ed:'03/12',bg:'gl3',ar:'3/4',img_num:TEST_IMG,desc:'La salida en Sakhir. Fernando al ataque desde el primer metro. La experiencia convertida en instinto, el instinto en imagen.'},
+  {id:'016',title:'Pit stop · Maranello',subtitle:'Ferrari 2.1 segundos',cat:'f1',loc:'Monza · 2023',circuit:'Monza',year:2023,ed:'04/12',bg:'gb1',ar:'2/3',img_num:TEST_IMG,desc:'2,1 segundos. El pit stop de Ferrari en Monza desde el ángulo perfecto. Una coreografía donde fallar no existe.'},
+  {id:'017',title:'Sunset · Abu Dhabi',subtitle:'Última vuelta 2023',cat:'f1',loc:'Abu Dhabi · 2023',circuit:'Yas Marina',year:2023,ed:'05/12',bg:'gb3',ar:'3/4',img_num:TEST_IMG,desc:'El sol cayendo sobre Yas Marina. La última vuelta de la temporada. Un año entero comprimido en este instante dorado.'},
+  {id:'018',title:'Carbon brake · Monza',subtitle:'250m mark',cat:'f1',loc:'Monza · 2024',circuit:'Monza',year:2024,ed:'06/12',bg:'gb5',ar:'4/5',img_num:TEST_IMG,desc:'Los 250 metros de frenada en Monza. El calor naranja de los frenos de carbono visible en pleno día. La física hecha fotografía.'},
+  {id:'019',title:'Podio · Silverstone',subtitle:'Tres campeones',cat:'f1',loc:'Silverstone · 2024',circuit:'Silverstone',year:2024,ed:'07/12',bg:'gb7',ar:'3/4',img_num:TEST_IMG,desc:'El podio de Silverstone. Tres campeones del mundo en un mismo escalón. Un documento histórico con piel de arte.'},
+  {id:'020',title:'Night race · Singapur',subtitle:'Marina Bay',cat:'noche',loc:'Singapur · 2023',circuit:'Marina Bay',year:2023,ed:'08/12',bg:'gb9',ar:'2/3',img_num:TEST_IMG,desc:'Marina Bay a las 2 AM. La ciudad de fondo, el monoplaza en primer plano. Las carreras nocturnas tienen otro vocabulario.'},
+  {id:'021',title:'Leclerc · Bahrain',subtitle:'Vuelta rápida',cat:'f1',loc:'Baréin · 2023',circuit:'Sakhir',year:2023,ed:'09/12',bg:'gb11',ar:'3/4',img_num:TEST_IMG,desc:'La vuelta rápida de Leclerc en Baréin. El tiempo en que todo se alineó. Una imagen que resume una temporada entera.'},
+  {id:'022',title:'Mechanics · Paddock',subtitle:'Pre-carrera',cat:'paddock',loc:'Baréin · 2024',circuit:'Sakhir',year:2024,ed:'10/12',bg:'gb2',ar:'4/3',img_num:TEST_IMG,desc:'El paddock de F1 en movimiento. Una ciudad efímera que se monta y desmonta en 72 horas. El equipo humano detrás de la máquina.'},
+  {id:'023',title:'Perez · Interlagos',subtitle:'Bajo la lluvia',cat:'f1',loc:'Brasil · 2023',circuit:'Interlagos',year:2023,ed:'11/12',bg:'gl4',ar:'3/4',img_num:TEST_IMG,desc:'Checo Pérez bajo el aguacero de Interlagos. El agua transforma la pista en un espejo. La lluvia convierte cualquier imagen en arte.'},
+  {id:'024',title:'F1 · Safety Car lap',subtitle:'Vuelta de formación',cat:'f1',loc:'Monza · 2024',circuit:'Monza',year:2024,ed:'12/12',bg:'gb4',ar:'2/3',img_num:TEST_IMG,desc:'La vuelta bajo el Safety Car. Tensión diferida. La quietud antes de la tormenta. El campo apretado, esperando.'},
+  // ── WRC ─────────────────────────────────────────────────────
+  {id:'025',title:'Tanak · Estonia',subtitle:'Salto forestal',cat:'wrc',loc:'Estonia · 2024',circuit:'Estonia',year:2024,ed:'01/12',bg:'gb6',ar:'3/4',img_num:TEST_IMG,desc:'El Hyundai de Tanak en el salto más largo de Estonia. Cuatro ruedas en el aire, la mecánica suspendida sobre el bosque.'},
+  {id:'026',title:'Ogier · Monte Carlo',subtitle:'Nieve y asfalto',cat:'wrc',loc:'Monte Carlo · 2024',circuit:'Monte Carlo',year:2024,ed:'02/12',bg:'gb8',ar:'4/5',img_num:TEST_IMG,desc:'Ogier en Monte Carlo. La mezcla de nieve y asfalto seco en el mismo viraje. Experiencia que no puede comprarse, solo vivirse.'},
+  {id:'027',title:'Evans · Gales',subtitle:'Barro y velocidad',cat:'wrc',loc:'Gales · 2023',circuit:'Gales',year:2023,ed:'03/12',bg:'gb10',ar:'3/4',img_num:TEST_IMG,desc:'El WRC en Gales. Elfyn Evans navegando entre barro y hojas caídas. La naturaleza como circuito, el bosque como espectador.'},
+  {id:'028',title:'Rovanpera · Finland',subtitle:'Gravel full send',cat:'wrc',loc:'Finlandia · 2023',circuit:'Finlandia',year:2023,ed:'04/12',bg:'gb12',ar:'2/3',img_num:TEST_IMG,desc:'Las pistas de gravilla de Finlandia. Rovanpera en casa, empujando sin límite. El sonido de la grava contra el coche, congelado.'},
+  {id:'029',title:'Dusk · Ypres',subtitle:'Rally de Bélgica',cat:'wrc',loc:'Bélgica · 2024',circuit:'Ypres',year:2024,ed:'05/12',bg:'gl1',ar:'3/4',img_num:TEST_IMG,desc:'El Rally de Ypres al atardecer. Los faros encendidos aún de día. Las carreteras belgas que no perdonan.'},
+  {id:'030',title:'Service park',subtitle:'Entre tramos',cat:'paddock',loc:'Estonia · 2024',circuit:'Estonia',year:2024,ed:'06/12',bg:'gb1',ar:'4/3',img_num:TEST_IMG,desc:'El service park del WRC. Entre tramo y tramo, el equipo convierte el coche en otro en 30 minutos. La logística como arte.'},
+  // ── MotoGP extra ─────────────────────────────────────────────
+  {id:'031',title:'Bastianini · Mugello',subtitle:'Curva del Serraglio',cat:'motogp',loc:'Mugello · 2024',circuit:'Mugello',year:2024,ed:'01/12',bg:'gb3',ar:'3/4',img_num:TEST_IMG,desc:'Bastianini atacando la curva del Serraglio. El Mugello en todo su esplendor, las gradas llenas, el sol en el casco.'},
+  {id:'032',title:'Di Giannantonio',subtitle:'Ángulo de inclinación máximo',cat:'motogp',loc:'Valencia · 2024',circuit:'Valencia',year:2024,ed:'02/12',bg:'gb5',ar:'4/5',img_num:TEST_IMG,desc:'El ángulo de inclinación de Fabio Di Giannantonio. La rodillera toca el asfalto. La geometría del riesgo.'},
+  {id:'033',title:'Zarco · Phillip Island',subtitle:'The Flying Frenchman',cat:'motogp',loc:'Australia · 2023',circuit:'Phillip Island',year:2023,ed:'03/12',bg:'gb7',ar:'3/4',img_num:TEST_IMG,desc:'Phillip Island desde el interior de la curva. Zarco volando sobre la colina. El viento del Pacífico dobla la moto.'},
+  {id:'034',title:'Acosta · Rookie',subtitle:'Primera temporada',cat:'motogp',loc:'Baréin · 2024',circuit:'Sakhir',year:2024,ed:'04/12',bg:'gb9',ar:'2/3',img_num:TEST_IMG,desc:'El rookie del año. Pedro Acosta en su primera temporada en MotoGP, irrumpiendo con una madurez que desafía la lógica.'},
+  {id:'035',title:'Warm up lap',subtitle:'Vuelta de calentamiento',cat:'motogp',loc:'Jerez · 2023',circuit:'Jerez',year:2023,ed:'05/12',bg:'gb11',ar:'3/4',img_num:TEST_IMG,desc:'La vuelta de calentamiento en Jerez. Las motos desfilan lentas, engañosamente tranquilas. El preludio de la tormenta.'},
+  {id:'036',title:'Ducati · Detalle',subtitle:'Aerodinámica',cat:'paddock',loc:'Mugello · 2024',circuit:'Mugello',year:2024,ed:'06/12',bg:'gl2',ar:'4/3',img_num:TEST_IMG,desc:'El ala delantera de la Ducati Desmosedici. Ingeniería que parece escultura. Una forma que existe solo para cortar el aire.'},
+  // ── F1 extra ─────────────────────────────────────────────────
+  {id:'037',title:'Norris · Zandvoort',subtitle:'Dunes chicane',cat:'f1',loc:'Países Bajos · 2024',circuit:'Zandvoort',year:2024,ed:'01/12',bg:'gb2',ar:'3/4',img_num:TEST_IMG,desc:'Norris en Zandvoort. La chicane entre las dunas, el Atlántico de fondo. Un circuito que abraza su geografía.'},
+  {id:'038',title:'Russell · Baku',subtitle:'Street circuit',cat:'f1',loc:'Azerbaiyán · 2024',circuit:'Bakú',year:2024,ed:'02/12',bg:'gb4',ar:'4/5',img_num:TEST_IMG,desc:'Las murallas de Bakú a 340 km/h. Russell navegando por el circuito urbano más peligroso del calendario. Historia al fondo.'},
+  {id:'039',title:'Sainz · Madrid',subtitle:'Gran Premio de España',cat:'f1',loc:'Madrid · 2026',circuit:'Madrid',year:2026,ed:'03/12',bg:'gb6',ar:'3/4',img_num:TEST_IMG,desc:'Carlos Sainz en Madrid. El hijo pródigo en el primer Gran Premio disputado en la capital. Una imagen para la historia.'},
+  {id:'040',title:'Grid · Abu Dhabi',subtitle:'Umbra pre-carrera',cat:'paddock',loc:'Abu Dhabi · 2023',circuit:'Yas Marina',year:2023,ed:'04/12',bg:'gb8',ar:'2/3',img_num:TEST_IMG,desc:'La parrilla de Abu Dhabi. Las sombras largas del atardecer sobre el asfalto. El paddock en su momento más cinematográfico.'},
+  // ── Noche & Paddock extra ─────────────────────────────────────
+  {id:'041',title:'Noche · Baréin',subtitle:'Los focos y el silencio',cat:'noche',loc:'Baréin · 2023',circuit:'Sakhir',year:2023,ed:'01/12',bg:'gl3',ar:'3/4',img_num:TEST_IMG,desc:'Baréin por la noche. Los focos del circuito crean una luz artificial sin hora, eterna. El desierto a oscuras, el asfalto encendido.'},
+  {id:'042',title:'Lusail · Medianoche',subtitle:'Antes del último stint',cat:'noche',loc:'Qatar · 2024',circuit:'Lusail',year:2024,ed:'02/12',bg:'gb10',ar:'4/5',img_num:TEST_IMG,desc:'Lusail a medianoche. La última hora de carrera. Los neumáticos al límite, la temperatura bajando, la tensión en su pico.'},
+  {id:'043',title:'Paddock · Madrugada',subtitle:'Solo mecánicos',cat:'paddock',loc:'Mugello · 2023',circuit:'Mugello',year:2023,ed:'03/12',bg:'gb12',ar:'3/4',img_num:TEST_IMG,desc:'Las 3 AM en el paddock de Mugello. Solo mecánicos y café. El silencio entre el viernes y el sábado. Una Toscana diferente.'},
+  {id:'044',title:'Hospitality · Dawn',subtitle:'El desayuno del equipo',cat:'paddock',loc:'Barcelona · 2023',circuit:'Barcelona',year:2023,ed:'04/12',bg:'gl4',ar:'4/3',img_num:TEST_IMG,desc:'El motorhome de madrugada. El equipo desayunando antes de que lleguen las cámaras. La intimidad que pocos ven.'},
+  // ── Circuitos especiales ──────────────────────────────────────
+  {id:'045',title:'Suzuka · S curves',subtitle:'Las S del legendario',cat:'motogp',loc:'Japón · 2023',circuit:'Suzuka',year:2023,ed:'01/12',bg:'gb1',ar:'3/4',img_num:TEST_IMG,desc:'Las S de Suzuka. El circuito más puro, donde la geometría lleva cuatro décadas desafiando a los mejores. Un clásico eterno.'},
+  {id:'046',title:'Spa · Forest section',subtitle:'Ardenas',cat:'f1',loc:'Bélgica · 2024',circuit:'Spa',year:2024,ed:'05/12',bg:'gb3',ar:'4/5',img_num:TEST_IMG,desc:'La sección del bosque de Spa. Los árboles centenarios a centímetros de la pista. La naturaleza conteniendo el aliento.'},
+  {id:'047',title:'Portimão · Sunset',subtitle:'La colina dorada',cat:'motogp',loc:'Portugal · 2024',circuit:'Portimão',year:2024,ed:'06/12',bg:'gb5',ar:'3/4',img_num:TEST_IMG,desc:'Portimão al atardecer. La colina que sube, que baja, que sorprende. Un circuito que nació para ser fotografiado así.'},
+  {id:'048',title:'Valencia · Final',subtitle:'Última imagen del año',cat:'motogp',loc:'Valencia · 2024',circuit:'Valencia',year:2024,ed:'12/12',bg:'gb7',ar:'2/3',img_num:TEST_IMG,desc:'Valencia cierra el año. La última imagen de la temporada. El circuito bajo el sol de noviembre. Silencio antes del invierno.'},
+];
+
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let activeFilter = 'all';
+let activeSort = 'recent';
+let currentPage = 0;
+const PAGE_SIZE = 12;
+let filteredPhotos = [];
+let currentLbIdx = 0;
+let isLoading = false;
+
+/* ══════════════════════════════════════
+   CURSOR
+══════════════════════════════════════ */
+const ce = document.getElementById('cur');
+const re = document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;ce.style.left=mx+'px';ce.style.top=my+'px';});
+(function loopR(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;re.style.left=rx+'px';re.style.top=ry+'px';requestAnimationFrame(loopR);})();
+function addHov(els){els.forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));});}
+addHov(document.querySelectorAll('a,button'));
+
+/* ══════════════════════════════════════
+   SCROLL PROGRESS
+══════════════════════════════════════ */
+const pbar = document.getElementById('pbar');
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  const p=window.scrollY/(document.body.scrollHeight-window.innerHeight);
+  pbar.style.width=(p*100)+'%';
+  nav.classList.toggle('scrolled',window.scrollY>60);
+},{passive:true});
+
+/* ══════════════════════════════════════
+   FILTER & SORT
+══════════════════════════════════════ */
+function getFiltered(){
+  let arr = activeFilter==='all' ? [...ALL_PHOTOS] : ALL_PHOTOS.filter(p=>p.cat===activeFilter);
+  if(activeSort==='circuit') arr.sort((a,b)=>a.circuit.localeCompare(b.circuit));
+  else if(activeSort==='edition') arr.sort((a,b)=>a.ed.localeCompare(b.ed));
+  else arr.sort((a,b)=>b.year-a.year||b.id.localeCompare(a.id));
+  return arr;
+}
+
+function updateCounts(){
+  document.getElementById('fc-all').textContent=ALL_PHOTOS.length;
+  ['motogp','f1','wrc','paddock','noche'].forEach(cat=>{
+    const el=document.getElementById('fc-'+cat);
+    if(el) el.textContent=ALL_PHOTOS.filter(p=>p.cat===cat).length;
+  });
+}
+
+/* ══════════════════════════════════════
+   BUILD CARD
+══════════════════════════════════════ */
+function buildCard(photo, delay=0){
+  const div = document.createElement('div');
+  div.className='photo-card';
+  div.style.animationDelay=delay+'ms';
+  div.dataset.id=photo.id;
+  // Build bg class + optional real image (uses img_num by default, falls back to img_slug)
+  const imgSrc = photo.img_num || photo.img_slug || photo.img || null;
+  const imgStyle = imgSrc
+    ? `style="--ar:${photo.ar};background-image:url('${imgSrc}')"` 
+    : `style="--ar:${photo.ar}"`;
+  const imgClass = imgSrc ? `photo-card-bg ${photo.bg} has-img` : `photo-card-bg ${photo.bg}`;
+  div.innerHTML=`
+    <div class="photo-card-inner">
+      <div class="${imgClass}" ${imgStyle}></div>
+      <div class="photo-card-overlay"></div>
+      <div class="photo-card-shimmer"></div>
+      <span class="photo-card-idx">${photo.id}</span>
+      <span class="photo-card-tag">${photo.cat.toUpperCase()}</span>
+      <div class="photo-card-info">
+        <div class="photo-card-cat">${photo.cat==='motogp'?'MotoGP':photo.cat==='f1'?'Formula 1':photo.cat==='wrc'?'WRC':photo.cat==='noche'?'Noche':'Paddock'}</div>
+        <div class="photo-card-title">${photo.title}</div>
+        <div class="photo-card-meta">
+          <span class="photo-card-loc">${photo.loc}</span>
+          <span class="photo-card-ed">Ed. ${photo.ed}</span>
+        </div>
+      </div>
+    </div>`;
+  div.addEventListener('click',()=>openLightbox(photo));
+  div.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+  div.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+  return div;
+}
+
+/* ══════════════════════════════════════
+   INTERSECTION OBSERVER for card reveal
+══════════════════════════════════════ */
+const cardObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      cardObs.unobserve(e.target);
+    }
+  });
+},{threshold:0.08,rootMargin:'0px 0px 80px 0px'});
+
+/* ══════════════════════════════════════
+   RENDER PAGE
+══════════════════════════════════════ */
+function renderPage(reset=false){
+  const grid = document.getElementById('grid');
+  if(reset){
+    grid.innerHTML='';
+    currentPage=0;
+    filteredPhotos=getFiltered();
+    document.getElementById('heroCount').textContent=filteredPhotos.length;
+    document.getElementById('emptyState').style.display=filteredPhotos.length?'none':'block';
+  }
+  const start=currentPage*PAGE_SIZE;
+  const slice=filteredPhotos.slice(start,start+PAGE_SIZE);
+  if(!slice.length) return;
+  slice.forEach((photo,i)=>{
+    const card=buildCard(photo,i*55);
+    grid.appendChild(card);
+    cardObs.observe(card);
+  });
+  currentPage++;
+}
+
+/* ══════════════════════════════════════
+   INFINITE SCROLL
+══════════════════════════════════════ */
+const spinner=document.getElementById('spinner');
+const sentinelObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting && !isLoading){
+    const hasMore=(currentPage*PAGE_SIZE)<filteredPhotos.length;
+    if(!hasMore)return;
+    isLoading=true;
+    spinner.classList.add('visible');
+    setTimeout(()=>{
+      renderPage(false);
+      spinner.classList.remove('visible');
+      isLoading=false;
+    },600);
+  }
+},{rootMargin:'200px'});
+sentinelObs.observe(document.getElementById('sentinel'));
+
+/* ══════════════════════════════════════
+   FILTER BUTTONS
+══════════════════════════════════════ */
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter=btn.dataset.filter;
+    renderPage(true);
+  });
+});
+document.querySelectorAll('.sort-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSort=btn.dataset.sort;
+    renderPage(true);
+  });
+});
+
+/* ══════════════════════════════════════
+   LIGHTBOX
+══════════════════════════════════════ */
+const lb=document.getElementById('lightbox');
+const lbBg=document.getElementById('lbImgBg');
+const lbNum=document.getElementById('lbNum');
+const lbCat=document.getElementById('lbCat');
+const lbTitle=document.getElementById('lbTitle');
+const lbDesc=document.getElementById('lbDesc');
+const lbMeta=document.getElementById('lbMeta');
+
+function catLabel(cat){
+  return {motogp:'MotoGP',f1:'Formula 1',wrc:'WRC Rally',paddock:'Paddock',noche:'Night Race'}[cat]||cat;
+}
+
+function openLightbox(photo){
+  currentLbIdx=filteredPhotos.findIndex(p=>p.id===photo.id);
+  fillLightbox(photo);
+  lb.classList.add('open');
+  document.body.classList.add('modal-open');
+  document.body.style.overflow='hidden';
+}
+
+function fillLightbox(photo){
+  // Animate bg change
+  lbBg.style.transition='opacity .35s ease';
+  lbBg.style.opacity='0';
+  setTimeout(()=>{
+    // Base gradient class
+    lbBg.className='lb-img-bg '+photo.bg;
+    // If photo has a real image, add it as background-image + has-img class
+    const imgSrc = photo.img_num || photo.img_slug || photo.img || null;
+    if(imgSrc){
+      lbBg.classList.add('has-img');
+      lbBg.style.backgroundImage=`url('${imgSrc}')`;
+    } else {
+      lbBg.classList.remove('has-img');
+      lbBg.style.backgroundImage='';
+    }
+    lbBg.style.opacity='1';
+  },200);
+  lbNum.textContent=photo.id;
+  lbCat.textContent=catLabel(photo.cat);
+  lbTitle.innerHTML=photo.title+'<em>'+photo.subtitle+'</em>';
+  lbDesc.textContent=photo.desc;
+  lbMeta.innerHTML=`
+    <div class="lb-meta-row"><span class="lb-meta-key">Circuito</span><span class="lb-meta-val">${photo.circuit}</span></div>
+    <div class="lb-meta-row"><span class="lb-meta-key">Ubicación</span><span class="lb-meta-val">${photo.loc}</span></div>
+    <div class="lb-meta-row"><span class="lb-meta-key">Año</span><span class="lb-meta-val">${photo.year}</span></div>
+    <div class="lb-meta-row"><span class="lb-meta-key">Edición</span><span class="lb-meta-val">${photo.ed} · 12 ejemplares</span></div>
+    <div class="lb-meta-row"><span class="lb-meta-key">Soporte</span><span class="lb-meta-val">Papel algodón 300g</span></div>
+    <div class="lb-meta-row"><span class="lb-meta-key">Firma</span><span class="lb-meta-val">Firmada y certificada</span></div>`;
+}
+
+function closeLightbox(){
+  lb.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow='';
+}
+
+document.getElementById('lbClose').addEventListener('click',closeLightbox);
+document.getElementById('lbBackdrop').addEventListener('click',closeLightbox);
+
+document.getElementById('lbNext').addEventListener('click',()=>{
+  currentLbIdx=(currentLbIdx+1)%filteredPhotos.length;
+  fillLightbox(filteredPhotos[currentLbIdx]);
+});
+document.getElementById('lbPrev').addEventListener('click',()=>{
+  currentLbIdx=(currentLbIdx-1+filteredPhotos.length)%filteredPhotos.length;
+  fillLightbox(filteredPhotos[currentLbIdx]);
+});
+
+// Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(!lb.classList.contains('open'))return;
+  if(e.key==='Escape')closeLightbox();
+  if(e.key==='ArrowRight'){currentLbIdx=(currentLbIdx+1)%filteredPhotos.length;fillLightbox(filteredPhotos[currentLbIdx]);}
+  if(e.key==='ArrowLeft'){currentLbIdx=(currentLbIdx-1+filteredPhotos.length)%filteredPhotos.length;fillLightbox(filteredPhotos[currentLbIdx]);}
+});
+
+// Hover on lightbox interactive elements
+addHov(document.querySelectorAll('#lightbox a,#lightbox button'));
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+updateCounts();
+renderPage(true);
+
+</script>
+</body>
+</html>
